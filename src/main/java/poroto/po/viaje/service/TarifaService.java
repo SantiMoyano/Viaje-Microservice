@@ -34,7 +34,7 @@ public class TarifaService {
         // Multiplica los minutos por la tarifa normal si no hubo pausas mayores a 15 mins.
         if (horaInfraccion == null) {
             costoViaje = costoTarifaNormal * minutosTotales;
-
+            
         // Aplica tarifa normal a los minutos no penalizados y tarifa extra a los minutos penalizados.
         } else {
             Double minutosPenalizados = (double) calcularMinutosConInfraccion(horaInfraccion);

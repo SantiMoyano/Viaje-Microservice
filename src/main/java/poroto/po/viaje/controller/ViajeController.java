@@ -94,8 +94,6 @@ public class ViajeController {
     @PutMapping("/terminar/{idMono}/{kmts}")
     public String terminarViaje(@PathVariable Long idMono, @PathVariable Long kmts) {
 
-        
-
         Viaje v = viajeRepo.dameViajeXMono(idMono);
         if (v == null)
             return "No existe tal viaje";
@@ -107,7 +105,7 @@ public class ViajeController {
         v.setKms(kmts);
 
         Duration diferencia = Duration.between(v.getHora_inicio(), hora);
-        // System.out.println(diferencia);
+
         // // Convierte la diferencia en horas, minutos y segundos
         int horas = (int) diferencia.toHours();
         int minutos = (int) diferencia.toMinutes() % 60;
@@ -132,19 +130,20 @@ public class ViajeController {
 
         TerminarViajeDTO finDelViaje = new TerminarViajeDTO(kmts, v.getTiempoConPausa(),tiempo);
 
-        LocalTime horaInfraccion = v.getHoraDeInfraccion();
+        // Calcula costo viaje
         LocalTime tiempoConPausas = v.getTiempoConPausa();
-        
+        LocalTime horaInfraccion = v.getHoraDeInfraccion();
         Double costoViaje = tarifaService.calcularCostoViaje(tiempoConPausas, horaInfraccion);
-        System.out.println("el viaje cuesta: "+costoViaje);
+        v.setFacturado(costoViaje);
+
+        // Facturar en la cuenta
+        cuentaService.descontarCostoViaje(v.getId_cuenta(), costoViaje);
+
         String x = monoService.apagar(idMono, finDelViaje);
         if (x.equals("se estaciono correctamente")) {
             this.viajeRepo.save(v);
             return "viaje finalizado con exito";
         }
-
-        // }
-        // return x;
         return "";
     }
 
