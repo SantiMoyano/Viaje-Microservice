@@ -221,4 +221,15 @@ public class ViajeController {
 
         return reporte;
     }
+
+    @GetMapping("/totalFacturadoEnRangoDeMeses/{mesInicio}/{mesFin}/{anio}")
+    public Double obtenerTotalFacturadoEnRangoDeMeses(@PathVariable int mesInicio, @PathVariable int mesFin,
+            @PathVariable int anio) {
+        Double totalFacturado = viajeRepo.getTotalFacturadoEnRangoDeMeses(mesInicio, mesFin, anio);
+
+        if (totalFacturado!=null) {
+            return totalFacturado;
+        }
+        return 0.0;
+    }
 }

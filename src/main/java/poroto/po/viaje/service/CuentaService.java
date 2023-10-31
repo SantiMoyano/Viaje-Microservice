@@ -3,7 +3,6 @@ package poroto.po.viaje.service;
 import java.net.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-import org.apache.tomcat.util.http.parser.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
