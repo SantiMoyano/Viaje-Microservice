@@ -1,5 +1,6 @@
 package poroto.po.viaje.service;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,28 @@ public class TarifaService {
 
     @GetMapping
     public Double calcularCostoViaje(LocalTime tiempoConPausas, LocalTime horaInfraccion) {
-        // Busca cuanto vale la tarifa normal
+        // Busca cuanto vale la tarifa normal y la extra
         Double costoTarifaNormal = rest.exchange(tarifaURL+"/tarifa-normal", HttpMethod.GET, null, Double.class).getBody();
+        Double costoTarifaExtra = rest.exchange(tarifaURL+"/tarifa-extra", HttpMethod.GET, null, Double.class).getBody();
         Double costoViaje = null;
+        int minutosTotales = tiempoConPausas.getMinute();
+
         // Multiplica los minutos por la tarifa normal si no hubo pausas mayores a 15 mins.
         if (horaInfraccion == null) {
-            costoViaje = costoTarifaNormal * tiempoConPausas.getMinute();
+            costoViaje = costoTarifaNormal * minutosTotales;
+
+        // Aplica tarifa normal a los minutos no penalizados y tarifa extra a los minutos penalizados.
+        } else {
+            Double minutosPenalizados = (double) calcularMinutosConInfraccion(horaInfraccion);
+            Double minutosNoPenalizados = minutosTotales - minutosPenalizados;
+            costoViaje = minutosNoPenalizados * costoTarifaNormal;
+            costoViaje += minutosPenalizados * costoTarifaExtra;
         }
-        // Multiplica los minutos por la tarifa normal si no hubo pausas mayores a 15 mins.
         return costoViaje;
+    }
+
+    private long calcularMinutosConInfraccion(LocalTime horaInfraccion) {
+        Duration diferencia = Duration.between(horaInfraccion, LocalTime.now());
+        return diferencia.getSeconds() / 60;
     }
 }
