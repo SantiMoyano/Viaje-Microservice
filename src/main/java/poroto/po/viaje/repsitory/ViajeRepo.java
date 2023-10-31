@@ -1,6 +1,8 @@
 package poroto.po.viaje.repsitory;
 
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,5 +15,7 @@ public interface ViajeRepo extends JpaRepository<Viaje,Long>{
 
     @Query("SELECT v.id_viaje FROM Viaje v WHERE v.monopatin=:idMono AND v.estaEnViaje=true")
     Long dameMonopatinAndId_cuenta(Long idMono);
-    
+
+    @Query("SELECT v FROM Viaje v WHERE YEAR(v.fecha_inicio) = :year")
+    List<Viaje> findByYear(@Param("year") int year);
 }

@@ -3,6 +3,8 @@ package poroto.po.viaje.controller;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 // import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import poroto.po.viaje.dtos.ReporteMonopatinesPorViajeDTO;
 import poroto.po.viaje.entity.TerminarViajeDTO;
 import poroto.po.viaje.entity.Viaje;
 import poroto.po.viaje.repsitory.ViajeRepo;
@@ -187,5 +190,35 @@ public class ViajeController {
         }
 
         return "";
+    }
+
+    @GetMapping("/obtenerReporteMonopatinesPorViaje/{cantViajes}/{anio}")
+    public List<ReporteMonopatinesPorViajeDTO> generarReportePorViaje(@PathVariable int cantViajes, @PathVariable int anio) {
+        List<ReporteMonopatinesPorViajeDTO> reporte = new ArrayList<ReporteMonopatinesPorViajeDTO>();
+    
+        // Obtiene todos los viajes en un año específico
+        List<Viaje> viajes = viajeRepo.findByYear(anio);
+
+        // Crea un map para realizar el seguimiento de la cantidad de viajes por monopatín
+        Map<Long, Long> cantidadViajesPorMonopatin = new HashMap<>();
+
+        // Itera a través de los viajes y cuenta la cantidad de viajes por monopatín
+        for (Viaje viaje : viajes) {
+            Long monopatinId = viaje.getMonopatin();
+            cantidadViajesPorMonopatin.put(monopatinId, cantidadViajesPorMonopatin.getOrDefault(monopatinId, 0L) + 1);
+        }
+
+        // Filtra los monopatines con más de la cantidad deseada de viajes
+        for (Map.Entry<Long, Long> entry : cantidadViajesPorMonopatin.entrySet()) {
+            if (entry.getValue() > cantViajes) {
+                ReporteMonopatinesPorViajeDTO dto = new ReporteMonopatinesPorViajeDTO();
+                dto.setCantViajes(entry.getValue());
+                dto.setAnio(anio);
+                dto.setMonopatin(entry.getKey());
+                reporte.add(dto);
+            }
+        }
+
+        return reporte;
     }
 }
