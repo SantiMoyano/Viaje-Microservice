@@ -25,6 +25,7 @@ import poroto.po.viaje.repsitory.ViajeRepo;
 import poroto.po.viaje.service.CuentaService;
 import poroto.po.viaje.service.MonopatinService;
 import poroto.po.viaje.service.PausaService;
+import poroto.po.viaje.service.TarifaService;
 
 @RestController
 // @RequestMapping("/viaje")
@@ -40,6 +41,9 @@ public class ViajeController {
 
     @Autowired
     private PausaService pausaService;
+
+    @Autowired
+    private TarifaService tarifaService;
 
     @GetMapping("/dameViajes")
     public List<Viaje> dameViajes() {
@@ -127,6 +131,12 @@ public class ViajeController {
         v.setEstaEnViaje(false);
 
         TerminarViajeDTO finDelViaje = new TerminarViajeDTO(kmts, v.getTiempoConPausa(),tiempo);
+
+        LocalTime horaInfraccion = v.getHoraDeInfraccion();
+        LocalTime tiempoConPausas = v.getTiempoConPausa();
+        
+        Double costoViaje = tarifaService.calcularCostoViaje(tiempoConPausas, horaInfraccion);
+        System.out.println("el viaje cuesta: "+costoViaje);
         String x = monoService.apagar(idMono, finDelViaje);
         if (x.equals("se estaciono correctamente")) {
             this.viajeRepo.save(v);

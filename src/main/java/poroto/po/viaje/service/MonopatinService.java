@@ -15,8 +15,6 @@ import poroto.po.viaje.entity.TerminarViajeDTO;
 
 @RestController
 public class MonopatinService {
-    // private final String direccion ="http://localhost:8082/monopatin";
-    // private final String direccion ="http://192.168.0.102:8082/monopatin";
 
     @Value("${monopatinURL}")
 	private String monopatinURL;
@@ -57,11 +55,6 @@ public class MonopatinService {
     public void setStandBy(Long idMono) {
          rest.getForEntity(monopatinURL+"/ponerEnStandBy/"+idMono,String.class);
     }
-
-    // public void setNotStandBy(Long idMono){
-                // rest.getForEntity(monopatinURL+"/ponerEnStandBy/"+idMono,null);
-
-    // }
 
 
 
