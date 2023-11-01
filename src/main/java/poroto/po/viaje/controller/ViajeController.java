@@ -72,16 +72,10 @@ public class ViajeController {
 
         if (saldo > (float) 0) {
             if (monoService.estaListoParaUsar(idMono)) {
-
                 LocalDate fecha = LocalDate.now();
-                // DateTimeFormatter fecha = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
                 LocalTime hora = LocalTime.now();
-                // DateTimeFormatter hora = DateTimeFormatter.ofPattern("HH:mm:ss");
-                // Viaje viaje = new Viaje(idCuenta, fecha, "", hora, "", (double) 0, idMono,
-                // true);
-
                 Viaje viaje = new Viaje(idCuenta, fecha, null, hora, null, (long) 0, idMono, true);
+
                 this.viajeRepo.save(viaje);
                 String r = monoService.encender(idMono);
                 return r;
@@ -109,7 +103,6 @@ public class ViajeController {
 
         Duration diferencia = Duration.between(v.getHora_inicio(), hora);
 
-        // // Convierte la diferencia en horas, minutos y segundos
         int horas = (int) diferencia.toHours();
         int minutos = (int) diferencia.toMinutes() % 60;
         int segundos = (int) diferencia.getSeconds() % 60;
