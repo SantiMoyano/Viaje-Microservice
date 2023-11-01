@@ -30,7 +30,6 @@ public class CuentaService {
     @GetMapping
     public Float dameSaldo(Long cuenta) {
         return rest.getForEntity(cuentaURL + "/tieneSaldo/" + cuenta, Float.class).getBody();
-        // return rest.getForEntity(direccion+"/"+cuenta, Float.class).getBody();
     }
 
     @PutMapping
