@@ -1,6 +1,8 @@
-Grupo X: Repositorio del Trabajo Práctico Especial de Arquitecturas Web
-
-# App
+Grupo 1: Trabajo Práctico Especial de Arquitecturas Web
+Carrizo Noelia
+Centeno Manuela
+Moyano Santiago
+Rodriguez Diego
 
 # Consultas POST y funcionalidades detectadas
 
