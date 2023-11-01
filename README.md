@@ -80,7 +80,7 @@ POST localhost:8081/iniciar
 Para iniciar un viaje unicamente se le pasa el id del monopatin que se esta usando, y el id de la cuenta que requirio el viaje.
 Dentro del controller se asegura que la cuenta tenga saldo preguntandole al microservicio 'Cuenta' (mediante un servicio):
 
-```
+```java
 @GetMapping
 public Float dameSaldo(Long cuenta) {
     return rest.getForEntity(cuentaURL + "/tieneSaldo/" + cuenta, Float.class).getBody();
@@ -89,7 +89,7 @@ public Float dameSaldo(Long cuenta) {
 
 Al confirmar que tenga saldo, se completan los campos faltantes y se marca como encendido el monopatin (mediante otro servicio). De esta forma otro usuario ya no puede solicitar el uso de este monopatin hasta que termine el viaje:
 
-```
+```java
 if (monoService.estaListoParaUsar(idMono)) {
     LocalDate fecha = LocalDate.now();
     LocalTime hora = LocalTime.now();
@@ -110,7 +110,7 @@ PUT localhost:8081/terminar/1/30
 
 Primero confirma si hay un monopatin con ese id en viaje, es decir busca un viaje que este_en_viaje == true y corresponda al ID del monopatin.
 
-```
+```java
 {
     Viaje v = viajeRepo.dameViajeXMono(idMono);
     if (v == null) return "No existe tal viaje";
@@ -120,7 +120,7 @@ Primero confirma si hay un monopatin con ese id en viaje, es decir busca un viaj
 
 Luego realiza multiples calculos para guardar en el viaje los campos como fecha, hora de fin y la duracion del viaje con pausas y sin pausas.
 
-```
+```java
 {
     LocalDate fecha = LocalDate.now();
     LocalTime hora = LocalTime.now();
@@ -153,7 +153,7 @@ Luego realiza multiples calculos para guardar en el viaje los campos como fecha,
 
 Ademas calcula el costo del viaje consultandole al microservicio 'Tarifa' cual es la tarifa normal y extra vigente.
 
-```
+```java
 {
     LocalTime tiempoConPausas = v.getTiempoConPausa();
     LocalTime horaInfraccion = v.getHoraDeInfraccion();
@@ -164,7 +164,7 @@ Ademas calcula el costo del viaje consultandole al microservicio 'Tarifa' cual e
 
 ... Luego en el servicio de tarifa:
 
-```
+```java
 public Double calcularCostoViaje(LocalTime tiempoConPausas, LocalTime horaInfraccion) {
     // Busca cuanto vale la tarifa normal y la extra
     Double costoTarifaNormal = rest.exchange(tarifaURL+"/tarifa-normal", HttpMethod.GET, null, Double.class).getBody();
