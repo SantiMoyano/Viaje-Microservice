@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +32,7 @@ import poroto.po.viaje.service.CuentaService;
 import poroto.po.viaje.service.MonopatinService;
 import poroto.po.viaje.service.PausaService;
 import poroto.po.viaje.service.TarifaService;
+import poroto.po.viaje.service.TokenService;
 
 @RestController
 @Tag(name = "Servicio Viaje", description = "Todo lo relacionado a los datos y detalles del viaje")
@@ -51,10 +53,15 @@ public class ViajeController {
     @Autowired
     private TarifaService tarifaService;
 
+    @Autowired
+    private TokenService token;
+
     @GetMapping("/dameViajes")
     @Operation(summary = "Lista de todos los viajes", description = "Listado completo tanto de los viajes en curso como los ya finalizados y sus detalles")
 
-    public List<Viaje> dameViajes() {
+    public List<Viaje> dameViajes(@RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return null;
         return viajeRepo.findAll();
     }
 
@@ -67,7 +74,10 @@ public class ViajeController {
     @SuppressWarnings("unchecked")
     @Operation(summary = "Inicio de viaje", description = "Da por comenzado un viaje, registrara sus pausas, kmts y duraciones ")
     @PostMapping("/iniciar")
-    public String iniciarViaje(@RequestBody String v) throws JsonMappingException, JsonProcessingException {
+    public String iniciarViaje(@RequestBody String v, @RequestHeader("Authorization") String authorization)
+            throws JsonMappingException, JsonProcessingException {
+        if (token.autorizado(authorization) == null)
+            return null;
 
         ObjectMapper jsonMap = new ObjectMapper();
         Map<String, Integer> data = jsonMap.readValue(v, Map.class);
@@ -98,7 +108,10 @@ public class ViajeController {
     @PutMapping("/terminar/{idMono}/{kmts}")
     @Operation(summary = "Fin da viaje", description = "Da por finalizado un viaje, registrando los detalles")
 
-    public String terminarViaje(@PathVariable Long idMono, @PathVariable Long kmts) {
+    public String terminarViaje(@PathVariable Long idMono, @PathVariable Long kmts,
+            @RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return null;
 
         Viaje v = viajeRepo.dameViajeXMono(idMono);
         if (v == null)
@@ -155,7 +168,10 @@ public class ViajeController {
     @GetMapping("/pausar/{idMono}")
     @Operation(summary = "Monopatin detenido", description = "Registrara y computará tiempos de pausa ")
 
-    public void pausarMono(@PathVariable Long idMono) {
+    public void pausarMono(@PathVariable Long idMono, @RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return;
+
         Viaje viaje = viajeRepo.dameViajeXMono(idMono);
         Long id_viaje = viaje.getId_viaje();
 
@@ -183,7 +199,10 @@ public class ViajeController {
     @GetMapping("/terminarPausa/{idMono}")
     @Operation(summary = "Fin de l Puasa", description = "Se tiene en cuenta este mensaje recibido por cuestios de computos de saldo")
 
-    public String terminarPausaMono(@PathVariable Long idMono) {
+    public String terminarPausaMono(@PathVariable Long idMono, @RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return null;
+
         Viaje viaje = viajeRepo.dameViajeXMono(idMono);
         Long id_viaje = viaje.getId_viaje();
         monoService.setStandBy(idMono);
@@ -202,7 +221,10 @@ public class ViajeController {
     @Operation(summary = "Reporte de viajes por año ", description = "Lista viajes de determinado año")
 
     public List<ReporteMonopatinesPorViajeDTO> generarReportePorViaje(@PathVariable int cantViajes,
-            @PathVariable int anio) {
+            @PathVariable int anio, @RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return null;
+
         List<ReporteMonopatinesPorViajeDTO> reporte = new ArrayList<ReporteMonopatinesPorViajeDTO>();
 
         // Obtiene todos los viajes en un año específico
@@ -236,7 +258,10 @@ public class ViajeController {
     @Operation(summary = "Reporte de facturas", description = "Valores precisos de los saldos en viajes por mes y año")
 
     public Double obtenerTotalFacturadoEnRangoDeMeses(@PathVariable int mesInicio, @PathVariable int mesFin,
-            @PathVariable int anio) {
+            @PathVariable int anio, @RequestHeader("Authorization") String authorization) {
+        if (token.autorizado(authorization) == null)
+            return null;
+
         Double totalFacturado = viajeRepo.getTotalFacturadoEnRangoDeMeses(mesInicio, mesFin, anio);
 
         if (totalFacturado != null) {
