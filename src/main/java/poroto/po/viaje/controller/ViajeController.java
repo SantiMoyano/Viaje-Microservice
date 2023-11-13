@@ -59,17 +59,18 @@ public class ViajeController {
     @GetMapping("/dameViajes")
     @Operation(summary = "Lista de todos los viajes", description = "Listado completo tanto de los viajes en curso como los ya finalizados y sus detalles")
 
-    public List<Viaje> dameViajes(@RequestHeader("Authorization") String authorization) {
-        if (token.autorizado(authorization) == null)
-            return null;
+    public List<Viaje> dameViajes() {
         return viajeRepo.findAll();
     }
 
-    // @GetMapping({ "/iniciar/{idMono}/{idCuenta}" })
-
-    // public String inicio() {
-    // return "anduvo";
+    // El mismo endoint pero con captura de token
+    // public List<Viaje> dameViajes(@RequestHeader("Authorization") String authorization) {
+    //     if (token.autorizado(authorization) == null)
+    //         return null;
+    //     return viajeRepo.findAll();
     // }
+
+  
 
     @SuppressWarnings("unchecked")
     @Operation(summary = "Inicio de viaje", description = "Da por comenzado un viaje, registrara sus pausas, kmts y duraciones ")
@@ -110,6 +111,7 @@ public class ViajeController {
 
     public String terminarViaje(@PathVariable Long idMono, @PathVariable Long kmts,
             @RequestHeader("Authorization") String authorization) {
+                
         if (token.autorizado(authorization) == null)
             return null;
 
@@ -259,14 +261,16 @@ public class ViajeController {
 
     public Double obtenerTotalFacturadoEnRangoDeMeses(@PathVariable int mesInicio, @PathVariable int mesFin,
             @PathVariable int anio, @RequestHeader("Authorization") String authorization) {
-        if (token.autorizado(authorization) == null)
+        if (token.autorizado(authorization).contains("ADMIN")){
+
+            Double totalFacturado = viajeRepo.getTotalFacturadoEnRangoDeMeses(mesInicio, mesFin, anio);
+    
+            if (totalFacturado != null) {
+                return totalFacturado;
+            }
+            return 0.0;
+        }
             return null;
 
-        Double totalFacturado = viajeRepo.getTotalFacturadoEnRangoDeMeses(mesInicio, mesFin, anio);
-
-        if (totalFacturado != null) {
-            return totalFacturado;
-        }
-        return 0.0;
     }
 }
