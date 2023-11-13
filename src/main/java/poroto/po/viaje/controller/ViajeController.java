@@ -21,6 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import poroto.po.viaje.dtos.ReporteMonopatinesPorViajeDTO;
 import poroto.po.viaje.entity.TerminarViajeDTO;
 import poroto.po.viaje.entity.Viaje;
@@ -31,7 +33,8 @@ import poroto.po.viaje.service.PausaService;
 import poroto.po.viaje.service.TarifaService;
 
 @RestController
-// @RequestMapping("/viaje")
+@Tag(name = "Servicio Viaje", description = "Todo lo relacionado a los datos y detalles del viaje")
+
 public class ViajeController {
     @Autowired
     private ViajeRepo viajeRepo;
@@ -49,16 +52,20 @@ public class ViajeController {
     private TarifaService tarifaService;
 
     @GetMapping("/dameViajes")
+    @Operation(summary = "Lista de todos los viajes", description = "Listado completo tanto de los viajes en curso como los ya finalizados y sus detalles")
+
     public List<Viaje> dameViajes() {
         return viajeRepo.findAll();
     }
 
-    @GetMapping({ "/iniciar/{idMono}/{idCuenta}" })
-    public String inicio() {
-        return "anduvo";
-    }
+    // @GetMapping({ "/iniciar/{idMono}/{idCuenta}" })
+
+    // public String inicio() {
+    // return "anduvo";
+    // }
 
     @SuppressWarnings("unchecked")
+    @Operation(summary = "Inicio de viaje", description = "Da por comenzado un viaje, registrara sus pausas, kmts y duraciones ")
     @PostMapping("/iniciar")
     public String iniciarViaje(@RequestBody String v) throws JsonMappingException, JsonProcessingException {
 
@@ -89,6 +96,8 @@ public class ViajeController {
     }
 
     @PutMapping("/terminar/{idMono}/{kmts}")
+    @Operation(summary = "Fin da viaje", description = "Da por finalizado un viaje, registrando los detalles")
+
     public String terminarViaje(@PathVariable Long idMono, @PathVariable Long kmts) {
 
         Viaje v = viajeRepo.dameViajeXMono(idMono);
@@ -124,7 +133,7 @@ public class ViajeController {
 
         v.setEstaEnViaje(false);
 
-        TerminarViajeDTO finDelViaje = new TerminarViajeDTO(kmts, v.getTiempoConPausa(),tiempo);
+        TerminarViajeDTO finDelViaje = new TerminarViajeDTO(kmts, v.getTiempoConPausa(), tiempo);
 
         // Calcula costo viaje
         LocalTime tiempoConPausas = v.getTiempoConPausa();
@@ -144,6 +153,8 @@ public class ViajeController {
     }
 
     @GetMapping("/pausar/{idMono}")
+    @Operation(summary = "Monopatin detenido", description = "Registrara y computará tiempos de pausa ")
+
     public void pausarMono(@PathVariable Long idMono) {
         Viaje viaje = viajeRepo.dameViajeXMono(idMono);
         Long id_viaje = viaje.getId_viaje();
@@ -170,6 +181,8 @@ public class ViajeController {
     }
 
     @GetMapping("/terminarPausa/{idMono}")
+    @Operation(summary = "Fin de l Puasa", description = "Se tiene en cuenta este mensaje recibido por cuestios de computos de saldo")
+
     public String terminarPausaMono(@PathVariable Long idMono) {
         Viaje viaje = viajeRepo.dameViajeXMono(idMono);
         Long id_viaje = viaje.getId_viaje();
@@ -177,7 +190,7 @@ public class ViajeController {
         LocalTime tiempoDeInfraccion = pausaService.terminarPausa(id_viaje);
         if (viaje.getHoraDeInfraccion() == null) {
             viaje.setHoraDeInfraccion(tiempoDeInfraccion);
-            LocalTime ahora=LocalTime.now();
+            LocalTime ahora = LocalTime.now();
             viaje.setHoraDeReincorporacion(ahora);
             viajeRepo.save(viaje);
         }
@@ -186,13 +199,17 @@ public class ViajeController {
     }
 
     @GetMapping("/obtenerReporteMonopatinesPorViaje/{cantViajes}/{anio}")
-    public List<ReporteMonopatinesPorViajeDTO> generarReportePorViaje(@PathVariable int cantViajes, @PathVariable int anio) {
+    @Operation(summary = "Reporte de viajes por año ", description = "Lista viajes de determinado año")
+
+    public List<ReporteMonopatinesPorViajeDTO> generarReportePorViaje(@PathVariable int cantViajes,
+            @PathVariable int anio) {
         List<ReporteMonopatinesPorViajeDTO> reporte = new ArrayList<ReporteMonopatinesPorViajeDTO>();
-    
+
         // Obtiene todos los viajes en un año específico
         List<Viaje> viajes = viajeRepo.findByYear(anio);
 
-        // Crea un map para realizar el seguimiento de la cantidad de viajes por monopatín
+        // Crea un map para realizar el seguimiento de la cantidad de viajes por
+        // monopatín
         Map<Long, Long> cantidadViajesPorMonopatin = new HashMap<>();
 
         // Itera a través de los viajes y cuenta la cantidad de viajes por monopatín
@@ -216,11 +233,13 @@ public class ViajeController {
     }
 
     @GetMapping("/totalFacturadoEnRangoDeMeses/{mesInicio}/{mesFin}/{anio}")
+    @Operation(summary = "Reporte de facturas", description = "Valores precisos de los saldos en viajes por mes y año")
+
     public Double obtenerTotalFacturadoEnRangoDeMeses(@PathVariable int mesInicio, @PathVariable int mesFin,
             @PathVariable int anio) {
         Double totalFacturado = viajeRepo.getTotalFacturadoEnRangoDeMeses(mesInicio, mesFin, anio);
 
-        if (totalFacturado!=null) {
+        if (totalFacturado != null) {
             return totalFacturado;
         }
         return 0.0;
